@@ -1,21 +1,32 @@
 import { NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 
+// Determine the base URL for callbacks
+const getBaseUrl = () => {
+  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
+  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  return "http://localhost:3000";
+};
+
 export const authOptions: NextAuthOptions = {
   providers: [
     GitHubProvider({
       clientId: process.env.GITHUB_ID!,
       clientSecret: process.env.GITHUB_SECRET!,
       authorization: {
+        url: "https://github.com/login/oauth/authorize",
         params: {
-          // Request read access to user profile and repos
           scope: "read:user user:email repo",
+          // Force the exact redirect_uri to match GitHub OAuth App config
+          redirect_uri: `${getBaseUrl()}/api/auth/callback/github`,
         },
       },
+      token: "https://github.com/login/oauth/access_token",
+      userinfo: "https://api.github.com/user",
     }),
   ],
-  // Helpful logs during setup (disabled in production automatically)
-  debug: process.env.NODE_ENV !== "production",
+  // Enable debug in non-production or when NEXTAUTH_DEBUG is set
+  debug: process.env.NODE_ENV !== "production" || process.env.NEXTAUTH_DEBUG === "true",
   callbacks: {
     async jwt({ token, account, profile }) {
       // Persist the OAuth access_token and username to the token right after signin
