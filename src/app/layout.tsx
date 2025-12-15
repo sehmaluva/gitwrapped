@@ -9,6 +9,12 @@ export const metadata: Metadata = {
   title: "GitHub Wrapped 2025 - Your Year in Code",
   description:
     "Discover your coding journey this year. See your commits, pull requests, favorite languages, and more in a beautiful, shareable format.",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/favicon.svg",
+  },
   openGraph: {
     title: "GitHub Wrapped 2025",
     description: "Your Year in Code - See your GitHub stats in a beautiful format",
