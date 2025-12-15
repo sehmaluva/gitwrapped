@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import logger from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
-  logger.info('API:DEBUG', 'Debug endpoint accessed', {
-    host: request.headers.get('host'),
-  });
-
   const config = {
     timestamp: new Date().toISOString(),
     NEXTAUTH_URL: process.env.NEXTAUTH_URL || "NOT SET",
