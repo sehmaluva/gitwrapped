@@ -44,15 +44,55 @@ interface StoryModeProps {
   onClose: () => void;
 }
 
-const SLIDE_DURATION = 5000; // 5 seconds per slide
+const SLIDE_DURATION = 8000; // 8 seconds per slide (slower)
+
+// Background music URL (royalty-free upbeat music)
+const MUSIC_URL = 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3';
 
 export default function StoryMode({ stats, onClose }: StoryModeProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingProgress, setRecordingProgress] = useState(0);
+  const [isMuted, setIsMuted] = useState(true);
+  const [isAutoPlay, setIsAutoPlay] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const chunksRef = useRef<Blob[]>([]);
+
+  // Initialize audio
+  useEffect(() => {
+    audioRef.current = new Audio(MUSIC_URL);
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.3;
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  // Handle music play/pause
+  useEffect(() => {
+    if (audioRef.current) {
+      if (isMuted || isPaused) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(() => {
+          // Autoplay blocked, user needs to interact first
+        });
+      }
+    }
+  }, [isMuted, isPaused]);
+
+  const toggleSound = () => {
+    setIsMuted(!isMuted);
+    if (audioRef.current && isMuted) {
+      audioRef.current.play().catch(() => {});
+    }
+  };
 
   // Calculate most active day and month
   const getMostActiveDay = () => {
@@ -181,7 +221,7 @@ export default function StoryMode({ stats, onClose }: StoryModeProps) {
 
   // Auto-advance slides
   useEffect(() => {
-    if (isPaused || isRecording) return;
+    if (isPaused || isRecording || !isAutoPlay) return;
 
     const timer = setInterval(() => {
       setCurrentSlide((prev) => {
@@ -193,7 +233,7 @@ export default function StoryMode({ stats, onClose }: StoryModeProps) {
     }, SLIDE_DURATION);
 
     return () => clearInterval(timer);
-  }, [isPaused, isRecording, slides.length]);
+  }, [isPaused, isRecording, isAutoPlay, slides.length]);
 
   const goToSlide = (index: number) => {
     setCurrentSlide(index);
@@ -283,28 +323,14 @@ export default function StoryMode({ stats, onClose }: StoryModeProps) {
       {/* Story container */}
       <div
         ref={containerRef}
-        className="relative w-full h-full max-w-md mx-auto"
-        onClick={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          if (x < rect.width / 2) {
-            prevSlide();
-          } else {
-            nextSlide();
-          }
-        }}
-        onMouseDown={() => setIsPaused(true)}
-        onMouseUp={() => setIsPaused(false)}
-        onMouseLeave={() => setIsPaused(false)}
-        onTouchStart={() => setIsPaused(true)}
-        onTouchEnd={() => setIsPaused(false)}
+        className="relative w-full h-full max-w-lg mx-auto"
       >
         {/* Progress bars */}
         <div className="absolute top-4 left-4 right-4 z-20 flex gap-1">
           {slides.map((slide, index) => (
             <div
               key={slide.id}
-              className="flex-1 h-1 bg-white/30 rounded-full overflow-hidden cursor-pointer"
+              className="flex-1 h-1.5 bg-white/30 rounded-full overflow-hidden cursor-pointer"
               onClick={(e) => {
                 e.stopPropagation();
                 goToSlide(index);
@@ -317,7 +343,7 @@ export default function StoryMode({ stats, onClose }: StoryModeProps) {
                   width: index < currentSlide ? '100%' : index === currentSlide ? '100%' : '0%',
                 }}
                 transition={{
-                  duration: index === currentSlide && !isPaused ? SLIDE_DURATION / 1000 : 0.3,
+                  duration: index === currentSlide && !isPaused && isAutoPlay ? SLIDE_DURATION / 1000 : 0.3,
                   ease: 'linear',
                 }}
               />
@@ -325,60 +351,132 @@ export default function StoryMode({ stats, onClose }: StoryModeProps) {
           ))}
         </div>
 
-        {/* Close button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            onClose();
-          }}
-          className="absolute top-10 right-4 z-20 text-white/80 hover:text-white p-2"
-        >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+        {/* Top controls */}
+        <div className="absolute top-10 left-4 right-4 z-20 flex justify-between items-center">
+          {/* Sound toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleSound();
+            }}
+            className="text-white/80 hover:text-white p-2 bg-black/30 rounded-full backdrop-blur-sm"
+          >
+            {isMuted ? (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              </svg>
+            )}
+          </button>
+
+          {/* Auto-play toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsAutoPlay(!isAutoPlay);
+            }}
+            className={`text-white/80 hover:text-white p-2 rounded-full backdrop-blur-sm ${isAutoPlay ? 'bg-green-500/30' : 'bg-black/30'}`}
+          >
+            {isAutoPlay ? (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+            )}
+          </button>
+
+          {/* Close button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="text-white/80 hover:text-white p-2 bg-black/30 rounded-full backdrop-blur-sm"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
         {/* Slide content */}
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
-            initial={{ opacity: 0, scale: 1.1 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.9 }}
-            transition={{ duration: 0.5 }}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -50 }}
+            transition={{ duration: 0.4, ease: 'easeOut' }}
             className="w-full h-full"
           >
             {slides[currentSlide].component}
           </motion.div>
         </AnimatePresence>
 
-        {/* Navigation hints */}
-        <div className="absolute inset-y-0 left-0 w-1/4 z-10" />
-        <div className="absolute inset-y-0 right-0 w-1/4 z-10" />
+        {/* Navigation buttons - always visible */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            prevSlide();
+          }}
+          disabled={currentSlide === 0}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 disabled:opacity-30 disabled:cursor-not-allowed text-white p-3 rounded-full backdrop-blur-sm transition-all"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            nextSlide();
+          }}
+          disabled={currentSlide === slides.length - 1}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-black/40 hover:bg-black/60 disabled:opacity-30 disabled:cursor-not-allowed text-white p-3 rounded-full backdrop-blur-sm transition-all"
+        >
+          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* Slide counter */}
+        <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-20 bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full">
+          <span className="text-white text-sm font-medium">
+            {currentSlide + 1} / {slides.length}
+          </span>
+        </div>
 
         {/* Bottom controls */}
-        <div className="absolute bottom-8 left-4 right-4 z-20 flex justify-center gap-4">
+        <div className="absolute bottom-6 left-4 right-4 z-20 flex justify-center gap-3">
           <motion.button
             onClick={(e) => {
               e.stopPropagation();
               shareAsVideo();
             }}
             disabled={isRecording}
-            className="flex items-center gap-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-6 py-3 rounded-full font-medium disabled:opacity-50"
+            className="flex items-center gap-2 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white px-4 py-2.5 rounded-full font-medium text-sm disabled:opacity-50"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             {isRecording ? (
               <>
-                <span className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-                Recording... {Math.round(recordingProgress)}%
+                <span className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse" />
+                {Math.round(recordingProgress)}%
               </>
             ) : (
               <>
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                 </svg>
-                Record Video
+                Record
               </>
             )}
           </motion.button>

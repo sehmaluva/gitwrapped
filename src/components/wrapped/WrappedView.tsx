@@ -17,10 +17,6 @@ export function WrappedView({ stats }: WrappedViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showStoryMode, setShowStoryMode] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
-  const [isDownloading, setIsDownloading] = useState(false);
-
-  // Check if native sharing is supported
-  const canShare = typeof navigator !== 'undefined' && !!navigator.share;
 
   const generateImage = async () => {
     const { domToPng } = await import("modern-screenshot");
@@ -36,54 +32,69 @@ export function WrappedView({ stats }: WrappedViewProps) {
     return null;
   };
 
-  const handleDownload = async () => {
-    setIsDownloading(true);
-    try {
-      const dataUrl = await generateImage();
-      if (dataUrl) {
-        const link = document.createElement("a");
-        link.download = `github-wrapped-${stats.username}-2025.png`;
-        link.href = dataUrl;
-        link.click();
-      }
-    } catch (error) {
-      console.error("Error downloading:", error);
-    } finally {
-      setIsDownloading(false);
-    }
-  };
-
   const handleShare = async () => {
     setIsSharing(true);
     try {
       const dataUrl = await generateImage();
-      if (dataUrl) {
-        // Convert data URL to blob for sharing
-        const response = await fetch(dataUrl);
-        const blob = await response.blob();
-        const file = new File([blob], `github-wrapped-${stats.username}-2025.png`, { type: 'image/png' });
+      if (!dataUrl) {
+        setIsSharing(false);
+        return;
+      }
 
-        // Check if Web Share API supports files
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      // Convert data URL to blob
+      const response = await fetch(dataUrl);
+      const blob = await response.blob();
+      const file = new File([blob], `github-wrapped-${stats.username}-2025.png`, { type: 'image/png' });
+
+      // Try native share with file first (works on most mobile browsers)
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        try {
+          // Check if we can share files
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file] });
+            setIsSharing(false);
+            return;
+          }
+        } catch (e) {
+          // canShare might throw, continue to fallback
+          console.log("File sharing not supported, trying text share");
+        }
+
+        // Try sharing without file (text/url only)
+        try {
           await navigator.share({
-            files: [file],
+            title: `${stats.name}'s GitHub Wrapped 2025`,
+            text: `Check out my GitHub Wrapped 2025! 🚀 ${stats.totalContributions} contributions this year!`,
           });
-        } else {
-          // Fallback: download the image if file sharing not supported
-          const link = document.createElement("a");
-          link.download = `github-wrapped-${stats.username}-2025.png`;
-          link.href = dataUrl;
-          link.click();
+          // Also download since we couldn't share the image
+          downloadImage(dataUrl);
+          setIsSharing(false);
+          return;
+        } catch (e) {
+          if ((e as Error).name === 'AbortError') {
+            // User cancelled
+            setIsSharing(false);
+            return;
+          }
         }
       }
+
+      // Fallback: direct download
+      downloadImage(dataUrl);
     } catch (error) {
-      // User cancelled or error occurred
-      if ((error as Error).name !== 'AbortError') {
-        console.error("Error sharing:", error);
-      }
+      console.error("Error sharing:", error);
     } finally {
       setIsSharing(false);
     }
+  };
+
+  const downloadImage = (dataUrl: string) => {
+    const link = document.createElement("a");
+    link.download = `github-wrapped-${stats.username}-2025.png`;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -109,11 +120,11 @@ export function WrappedView({ stats }: WrappedViewProps) {
         <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
           {/* Share Button */}
           <button
-            onClick={canShare ? handleShare : handleDownload}
-            disabled={isSharing || isDownloading}
+            onClick={handleShare}
+            disabled={isSharing}
             className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-sky-500 to-emerald-600 hover:from-sky-600 hover:to-emerald-700 text-white rounded-full font-semibold flex items-center gap-2 transition-all hover:scale-105 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {(isSharing || isDownloading) ? (
+            {isSharing ? (
               <>
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
