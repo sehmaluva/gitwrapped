@@ -44,7 +44,7 @@ interface StoryModeProps {
   onClose: () => void;
 }
 
-const SLIDE_DURATION = 8000; // 8 seconds per slide (slower)
+const SLIDE_DURATION = 12000; // 12 seconds per slide (gives time to read)
 
 // Background music URL (royalty-free upbeat music)
 const MUSIC_URL = 'https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3';
@@ -410,10 +410,10 @@ export default function StoryMode({ stats, onClose }: StoryModeProps) {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentSlide}
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -50 }}
-            transition={{ duration: 0.4, ease: 'easeOut' }}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.05 }}
+            transition={{ duration: 0.8, ease: 'easeInOut' }}
             className="w-full h-full"
           >
             {slides[currentSlide].component}

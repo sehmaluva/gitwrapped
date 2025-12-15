@@ -12,11 +12,11 @@ interface IntroSlideProps {
 
 // Generate random particles once outside the component
 function generateParticles() {
-  return [...Array(20)].map((_, i) => ({
+  return [...Array(15)].map((_, i) => ({ // Fewer particles for less lag
     id: i,
     x: Math.random() * 100,
-    duration: 4 + Math.random() * 3,
-    delay: Math.random() * 2,
+    duration: 12 + Math.random() * 6, // Much slower
+    delay: Math.random() * 4,
   }));
 }
 
@@ -55,7 +55,7 @@ export default function IntroSlide({ username, avatarUrl, year }: IntroSlideProp
       <motion.div
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.8, ease: 'easeOut' }}
+        transition={{ duration: 1.2, ease: 'easeOut' }}
         className="relative z-10 flex flex-col items-center"
       >
         {/* Avatar with glow */}
@@ -68,7 +68,7 @@ export default function IntroSlide({ username, avatarUrl, year }: IntroSlideProp
               '0 0 20px rgba(56, 189, 248, 0.5)'
             ]
           }}
-          transition={{ duration: 2, repeat: Infinity }}
+          transition={{ duration: 3, repeat: Infinity }}
         >
           <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden border-4 border-white/30">
             <Image
@@ -85,7 +85,7 @@ export default function IntroSlide({ username, avatarUrl, year }: IntroSlideProp
         <motion.h1
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.6 }}
+          transition={{ delay: 1.5, duration: 0.8 }}
           className="mt-6 text-3xl md:text-4xl font-bold text-white"
         >
           @{username}
@@ -95,7 +95,7 @@ export default function IntroSlide({ username, avatarUrl, year }: IntroSlideProp
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.8, duration: 0.6 }}
+          transition={{ delay: 2.5, duration: 0.8 }}
           className="mt-4"
         >
           <span className="text-6xl md:text-8xl font-black bg-gradient-to-r from-sky-400 to-emerald-400 bg-clip-text text-transparent">
@@ -107,7 +107,7 @@ export default function IntroSlide({ username, avatarUrl, year }: IntroSlideProp
         <motion.p
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 1.1, duration: 0.6 }}
+          transition={{ delay: 3.5, duration: 0.8 }}
           className="mt-4 text-lg md:text-xl text-white/70"
         >
           Your Year in Code
@@ -119,7 +119,7 @@ export default function IntroSlide({ username, avatarUrl, year }: IntroSlideProp
         className="absolute inset-0 flex items-center justify-center"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
+        transition={{ delay: 4 }}
       >
         {[1, 2, 3].map((ring) => (
           <motion.div
@@ -134,9 +134,9 @@ export default function IntroSlide({ username, avatarUrl, year }: IntroSlideProp
               opacity: [0.3, 0.1, 0.3],
             }}
             transition={{
-              duration: 3,
+              duration: 5,
               repeat: Infinity,
-              delay: ring * 0.5,
+              delay: ring * 0.8,
             }}
           />
         ))}

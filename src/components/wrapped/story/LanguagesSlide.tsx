@@ -34,13 +34,14 @@ export default function LanguagesSlide({ languages }: LanguagesSlideProps) {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
         className="relative z-10 flex flex-col items-center w-full px-6"
       >
         {/* Header */}
         <motion.p
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
           className="text-lg md:text-xl text-white/70 mb-2"
         >
           Your top languages
@@ -51,7 +52,7 @@ export default function LanguagesSlide({ languages }: LanguagesSlideProps) {
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
+            transition={{ delay: 1.5, duration: 0.8, type: 'spring', stiffness: 100 }}
             className="mb-10"
           >
             <motion.div
@@ -63,7 +64,7 @@ export default function LanguagesSlide({ languages }: LanguagesSlideProps) {
                   `0 0 20px ${topLanguages[0].color}80`,
                 ],
               }}
-              transition={{ duration: 2, repeat: Infinity }}
+              transition={{ duration: 4, repeat: Infinity }}
               style={{ color: topLanguages[0].color }}
             >
               {topLanguages[0].name}
@@ -71,7 +72,7 @@ export default function LanguagesSlide({ languages }: LanguagesSlideProps) {
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.8 }}
+              transition={{ delay: 2.5, duration: 0.6 }}
               className="text-center text-white/60 mt-2 text-lg"
             >
               was your #1 language
@@ -86,7 +87,7 @@ export default function LanguagesSlide({ languages }: LanguagesSlideProps) {
               key={lang.name}
               initial={{ x: -100, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 1 + index * 0.2, type: 'spring' }}
+              transition={{ delay: 3 + index * 0.4, duration: 0.6, type: 'spring' }}
               className="relative"
             >
               <div className="flex justify-between mb-1">
@@ -105,7 +106,7 @@ export default function LanguagesSlide({ languages }: LanguagesSlideProps) {
                   style={{ backgroundColor: lang.color }}
                   initial={{ width: 0 }}
                   animate={{ width: `${lang.percentage}%` }}
-                  transition={{ delay: 1.2 + index * 0.2, duration: 0.8, ease: 'easeOut' }}
+                  transition={{ delay: 3.3 + index * 0.4, duration: 1, ease: 'easeOut' }}
                 />
               </div>
             </motion.div>
@@ -117,7 +118,7 @@ export default function LanguagesSlide({ languages }: LanguagesSlideProps) {
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 2.2 }}
+            transition={{ delay: 6, duration: 0.8 }}
             className="mt-6 text-white/60 text-sm italic text-center max-w-sm"
           >
             {languageQuote}

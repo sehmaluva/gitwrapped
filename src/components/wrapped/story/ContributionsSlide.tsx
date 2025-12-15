@@ -21,8 +21,8 @@ function generateCodeParticles() {
     symbol,
     id: i,
     x: Math.random() * 100,
-    duration: 8 + Math.random() * 4,
-    delay: Math.random() * 3,
+    duration: 15 + Math.random() * 8, // Slower particles
+    delay: Math.random() * 5,
   }));
 }
 
@@ -77,13 +77,14 @@ export default function ContributionsSlide({
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
         className="relative z-10 flex flex-col items-center px-6"
       >
         {/* Header */}
         <motion.p
           initial={{ y: -20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.5, duration: 0.8 }}
           className="text-lg md:text-xl text-white/70 mb-4"
         >
           You made
@@ -93,14 +94,14 @@ export default function ContributionsSlide({
         <motion.div
           initial={{ scale: 0.5, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.4, type: 'spring', stiffness: 200 }}
+          transition={{ delay: 1, duration: 0.8, type: 'spring', stiffness: 100 }}
           className="relative"
         >
           <motion.span 
             className="text-6xl md:text-8xl lg:text-9xl font-black text-white"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 1.5, duration: 0.6 }}
           >
             <Counter value={totalContributions} />
           </motion.span>
@@ -119,7 +120,7 @@ export default function ContributionsSlide({
         <motion.p
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.8 }}
+          transition={{ delay: 2, duration: 0.6 }}
           className="text-2xl md:text-3xl text-white/90 mt-2 font-medium"
         >
           contributions
@@ -130,20 +131,20 @@ export default function ContributionsSlide({
           className="grid grid-cols-2 gap-4 mt-10 md:mt-16 w-full max-w-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
+          transition={{ delay: 2.5, duration: 0.6 }}
         >
           {stats.map((stat, index) => (
             <motion.div
               key={stat.label}
               initial={{ x: index % 2 === 0 ? -50 : 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
-              transition={{ delay: 1.4 + index * 0.15, type: 'spring' }}
+              transition={{ delay: 3 + index * 0.3, duration: 0.5, type: 'spring' }}
               className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 text-center"
             >
               <motion.span
                 className={`text-2xl md:text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}
               >
-                <Counter value={stat.value} delay={1.6 + index * 0.15} />
+                <Counter value={stat.value} delay={3.2 + index * 0.3} />
               </motion.span>
               <p className="text-sm md:text-base text-white/70 mt-1">{stat.label}</p>
             </motion.div>
@@ -154,7 +155,7 @@ export default function ContributionsSlide({
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 2 }}
+          transition={{ delay: 5, duration: 0.8 }}
           className="mt-8 text-center"
         >
           <p className="text-white/80 text-sm md:text-base italic">{quote}</p>
