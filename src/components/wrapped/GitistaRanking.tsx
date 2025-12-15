@@ -7,104 +7,29 @@ interface GitistaRankingProps {
   location: string | null;
 }
 
-// Map common location strings to country codes for Gitista
-function getCountryCode(location: string | null): string | null {
+// Helper to format location for Gitista URL
+function getCountrySlug(location: string | null): { slug: string; name: string } | null {
   if (!location) return null;
   
-  const locationLower = location.toLowerCase();
+  // Get the last part of the location (usually the country)
+  const parts = location.split(',');
+  const country = parts[parts.length - 1].trim();
   
-  // Common country mappings
-  const countryMappings: Record<string, string> = {
-    // Full names
-    "united states": "us",
-    "usa": "us",
-    "united kingdom": "uk",
-    "uk": "uk",
-    "england": "uk",
-    "germany": "de",
-    "france": "fr",
-    "canada": "ca",
-    "australia": "au",
-    "india": "in",
-    "brazil": "br",
-    "japan": "jp",
-    "china": "cn",
-    "south korea": "kr",
-    "korea": "kr",
-    "netherlands": "nl",
-    "spain": "es",
-    "italy": "it",
-    "russia": "ru",
-    "poland": "pl",
-    "sweden": "se",
-    "switzerland": "ch",
-    "portugal": "pt",
-    "indonesia": "id",
-    "mexico": "mx",
-    "turkey": "tr",
-    "argentina": "ar",
-    "south africa": "za",
-    "nigeria": "ng",
-    "kenya": "ke",
-    "egypt": "eg",
-    "israel": "il",
-    "singapore": "sg",
-    "vietnam": "vn",
-    "thailand": "th",
-    "philippines": "ph",
-    "pakistan": "pk",
-    "bangladesh": "bd",
-    "ukraine": "ua",
-    "czech republic": "cz",
-    "czechia": "cz",
-    "austria": "at",
-    "belgium": "be",
-    "denmark": "dk",
-    "finland": "fi",
-    "norway": "no",
-    "ireland": "ie",
-    "new zealand": "nz",
-    "malaysia": "my",
-    "taiwan": "tw",
-    "hong kong": "hk",
-    "colombia": "co",
-    "chile": "cl",
-    "peru": "pe",
-    "romania": "ro",
-    "greece": "gr",
-    "hungary": "hu",
-  };
-
-  // Check for exact matches or contains
-  for (const [key, code] of Object.entries(countryMappings)) {
-    if (locationLower.includes(key)) {
-      return code;
-    }
-  }
-
-  // Check for 2-letter country codes in the location string
-  const twoLetterMatch = locationLower.match(/\b([a-z]{2})\b/);
-  if (twoLetterMatch) {
-    const possibleCode = twoLetterMatch[1];
-    // Validate it's a known code
-    const knownCodes = Object.values(countryMappings);
-    if (knownCodes.includes(possibleCode)) {
-      return possibleCode;
-    }
-  }
-
-  return null;
+  // Format for URL: lowercase and hyphenated
+  const slug = country.toLowerCase().replace(/\s+/g, '-');
+  
+  return { slug, name: country };
 }
 
 export function GitistaRanking({ username, location }: GitistaRankingProps) {
   const [isHovered, setIsHovered] = useState(false);
   
-  const countryCode = getCountryCode(location);
-  const gitistaUrl = countryCode 
-    ? `https://gitista.com/${countryCode}/${username}`
+  const countryInfo = getCountrySlug(location);
+  const gitistaUrl = countryInfo 
+    ? `https://gitista.com/${countryInfo.slug}/${username}`
     : `https://gitista.com/global/${username}`;
   
-  const rankingType = countryCode ? `${countryCode.toUpperCase()} Ranking` : "Global Ranking";
+  const rankingType = countryInfo ? `${countryInfo.name} Ranking` : "Global Ranking";
 
   return (
     <a
