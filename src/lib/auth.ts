@@ -14,6 +14,8 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  // Helpful logs during setup (disabled in production automatically)
+  debug: process.env.NODE_ENV !== "production",
   callbacks: {
     async jwt({ token, account, profile }) {
       // Persist the OAuth access_token and username to the token right after signin
@@ -31,6 +33,19 @@ export const authOptions: NextAuthOptions = {
       session.accessToken = token.accessToken as string;
       session.username = token.username as string;
       return session;
+    },
+    // Ensure redirects always land on our own domain
+    async redirect({ url, baseUrl }) {
+      try {
+        const parsed = new URL(url, baseUrl);
+        // Same origin or relative URL -> allow
+        if (parsed.origin === baseUrl || url.startsWith("/")) {
+          return parsed.toString();
+        }
+      } catch {
+        // Fall through to baseUrl
+      }
+      return baseUrl;
     },
   },
   pages: {
