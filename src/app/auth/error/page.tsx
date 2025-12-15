@@ -2,17 +2,35 @@
 
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 
 function ErrorContent() {
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
+  const errorDescription = searchParams.get("error_description");
+  const callbackUrl = searchParams.get("callbackUrl");
+
+  // Log error details to console for debugging
+  useEffect(() => {
+    const timestamp = new Date().toISOString();
+    console.log(`[${timestamp}] [AUTH:ERROR_PAGE] Error page loaded`, {
+      error,
+      errorDescription,
+      callbackUrl,
+      allParams: Object.fromEntries(searchParams.entries()),
+      referrer: document.referrer,
+      href: window.location.href,
+    });
+  }, [error, errorDescription, callbackUrl, searchParams]);
 
   const errorMessages: Record<string, string> = {
     OAuthCallback: "There was a problem with the GitHub authentication. This usually means the OAuth app is misconfigured.",
     OAuthSignin: "Could not start the GitHub sign-in process.",
     OAuthAccountNotLinked: "This email is already associated with another account.",
     Callback: "There was an error during the authentication callback.",
+    AccessDenied: "Access was denied. You may have cancelled the sign-in or don't have permission.",
+    Configuration: "There's a server configuration issue. Check the OAuth settings.",
+    Verification: "The verification token has expired or has already been used.",
     Default: "An authentication error occurred.",
   };
 
@@ -26,9 +44,23 @@ function ErrorContent() {
         <p className="text-gray-400 mb-6">{message}</p>
         
         {error && (
-          <div className="bg-gray-900 rounded-lg p-3 mb-6">
+          <div className="bg-gray-900 rounded-lg p-3 mb-4">
             <p className="text-xs text-gray-500">Error code:</p>
             <code className="text-red-400 text-sm">{error}</code>
+          </div>
+        )}
+
+        {errorDescription && (
+          <div className="bg-gray-900 rounded-lg p-3 mb-4">
+            <p className="text-xs text-gray-500">Details:</p>
+            <code className="text-orange-400 text-sm break-all">{errorDescription}</code>
+          </div>
+        )}
+
+        {callbackUrl && (
+          <div className="bg-gray-900 rounded-lg p-3 mb-6">
+            <p className="text-xs text-gray-500">Callback URL:</p>
+            <code className="text-yellow-400 text-xs break-all">{callbackUrl}</code>
           </div>
         )}
 
@@ -45,10 +77,29 @@ function ErrorContent() {
           >
             View Debug Info
           </Link>
+          <button
+            onClick={() => {
+              const debugInfo = {
+                timestamp: new Date().toISOString(),
+                error,
+                errorDescription,
+                callbackUrl,
+                allParams: Object.fromEntries(searchParams.entries()),
+                href: window.location.href,
+                referrer: document.referrer,
+              };
+              console.log('[AUTH:ERROR_PAGE] Debug info:', debugInfo);
+              navigator.clipboard?.writeText(JSON.stringify(debugInfo, null, 2));
+              alert('Debug info copied to clipboard and logged to console!');
+            }}
+            className="block w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors text-sm"
+          >
+            Copy Debug Info
+          </button>
         </div>
 
         <p className="mt-6 text-xs text-gray-500">
-          If this keeps happening, the site admin needs to check the GitHub OAuth App configuration.
+          If this keeps happening, check the browser console (F12) and Vercel logs for details.
         </p>
       </div>
     </main>
