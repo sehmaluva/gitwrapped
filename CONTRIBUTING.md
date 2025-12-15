@@ -14,6 +14,7 @@ First off, thank you for considering contributing to GitHub Wrapped! 🎉
   - [Development Setup](#development-setup)
     - [Prerequisites](#prerequisites)
     - [Installation](#installation)
+  - [Project Structure](#project-structure)
   - [Style Guidelines](#style-guidelines)
     - [TypeScript](#typescript)
     - [React](#react)
@@ -59,7 +60,7 @@ Feature suggestions are welcome! Please include:
 
 ### Prerequisites
 
-- Node.js 18+ 
+- Node.js 20+ 
 - npm or yarn
 - GitHub OAuth App credentials
 
@@ -90,6 +91,21 @@ Feature suggestions are welcome! Please include:
    ```
 
 5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Project Structure
+
+The project follows a standard Next.js App Router structure:
+
+- `src/app`: Application routes and pages
+  - `api/`: Backend API routes (Auth, GitHub stats)
+  - `wrapped/`: The main "Wrapped" result page
+- `src/components`: React components
+  - `wrapped/`: Components specific to the Wrapped presentation (slides, charts)
+  - `wrapped/story/`: Individual slide components for the Story Mode
+- `src/lib`: Utility functions
+  - `github.ts`: GitHub GraphQL API client and queries
+  - `auth.ts`: NextAuth configuration
+- `public`: Static assets
 
 ## Style Guidelines
 
