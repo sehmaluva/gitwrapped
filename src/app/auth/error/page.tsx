@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense, useEffect } from "react";
+import { signOut } from "next-auth/react";
 
 function ErrorContent() {
   const searchParams = useSearchParams();
@@ -12,15 +13,14 @@ function ErrorContent() {
 
   // Log error details to console for debugging
   useEffect(() => {
-    const timestamp = new Date().toISOString();
-    console.log(`[${timestamp}] [AUTH:ERROR_PAGE] Error page loaded`, {
+    console.log('[AUTH:ERROR_PAGE]', JSON.stringify({
+      timestamp: new Date().toISOString(),
+      level: 'ERROR',
       error,
       errorDescription,
       callbackUrl,
       allParams: Object.fromEntries(searchParams.entries()),
-      referrer: document.referrer,
-      href: window.location.href,
-    });
+    }));
   }, [error, errorDescription, callbackUrl, searchParams]);
 
   const errorMessages: Record<string, string> = {
@@ -71,6 +71,12 @@ function ErrorContent() {
           >
             Try Again
           </Link>
+          <button
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="block w-full px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold transition-colors"
+          >
+            Logout & Retry
+          </button>
           <Link
             href="/api/auth/debug"
             className="block w-full px-6 py-3 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors text-sm"
