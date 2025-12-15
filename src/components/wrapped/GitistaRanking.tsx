@@ -62,7 +62,7 @@ export function GitistaRanking({ username, location }: GitistaRankingProps) {
       </div>
       
       <p className="text-gray-300 text-sm mb-4">
-        See how you rank among {countryCode ? `developers in ${countryCode.toUpperCase()}` : "developers worldwide"} on Gitista
+        See how you rank among {countryInfo ? `developers in ${countryInfo.name}` : "developers worldwide"} on Gitista
       </p>
       
       <div className="flex items-center gap-2 text-sky-400 font-medium text-sm">
