@@ -6,6 +6,7 @@ export const GITHUB_STATS_QUERY = `
       login
       name
       avatarUrl
+      location
       followers {
         totalCount
       }
@@ -64,6 +65,7 @@ export interface GitHubStats {
     login: string;
     name: string;
     avatarUrl: string;
+    location: string | null;
     followers: {
       totalCount: number;
     };
@@ -181,6 +183,7 @@ export interface ProcessedStats {
   mostProductiveMonth: string;
   followers: number;
   publicRepos: number;
+  location: string | null;
 }
 
 export function processGitHubStats(data: GitHubStats): ProcessedStats {
@@ -292,6 +295,7 @@ export function processGitHubStats(data: GitHubStats): ProcessedStats {
     mostProductiveMonth,
     followers: user.followers.totalCount,
     publicRepos: user.repositories.totalCount,
+    location: user.location,
   };
 }
 

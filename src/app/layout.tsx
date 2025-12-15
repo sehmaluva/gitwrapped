@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const inter = Inter({ subsets: ["latin"], preload: false });
 
@@ -11,9 +12,9 @@ export const metadata: Metadata = {
     "Discover your coding journey this year. See your commits, pull requests, favorite languages, and more in a beautiful, shareable format.",
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/logo.svg", type: "image/svg+xml" },
     ],
-    apple: "/favicon.svg",
+    apple: "/logo.svg",
   },
   openGraph: {
     title: "GitHub Wrapped 2025",
@@ -36,6 +37,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <SessionProvider>{children}</SessionProvider>
+        <SpeedInsights />
       </body>
     </html>
   );
