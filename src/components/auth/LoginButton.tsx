@@ -44,7 +44,7 @@ export function LoginButton() {
 
   return (
     <button
-      onClick={() => signIn("github")}
+      onClick={() => signIn("github", { callbackUrl: "/" })}
       className="px-6 py-3 bg-white hover:bg-gray-100 text-gray-900 rounded-lg font-semibold flex items-center gap-2 transition-colors"
     >
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
