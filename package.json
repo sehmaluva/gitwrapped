@@ -11,6 +11,7 @@
   "dependencies": {
     "@octokit/graphql": "^9.0.3",
     "date-fns": "^4.1.0",
+    "framer-motion": "^12.23.26",
     "modern-screenshot": "^4.6.7",
     "next": "16.0.10",
     "next-auth": "^4.24.13",

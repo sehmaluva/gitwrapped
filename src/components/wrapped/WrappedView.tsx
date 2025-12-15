@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import Image from "next/image";
 import { ProcessedStats } from "@/lib/github";
 import { StatsCard } from "./StatsCard";
 import { LanguageChart } from "./LanguageChart";
 import { ContributionCalendar } from "./ContributionCalendar";
 import { TopRepos } from "./TopRepos";
+import StoryMode from "./story/StoryMode";
 
 interface WrappedViewProps {
   stats: ProcessedStats;
@@ -14,6 +15,7 @@ interface WrappedViewProps {
 
 export function WrappedView({ stats }: WrappedViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [showStoryMode, setShowStoryMode] = useState(false);
 
   const handleShare = async () => {
     try {
@@ -65,6 +67,15 @@ export function WrappedView({ stats }: WrappedViewProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
           </svg>
           Download as Image
+        </button>
+        <button
+          onClick={() => setShowStoryMode(true)}
+          className="mt-3 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-full font-bold flex items-center gap-3 mx-auto transition-all hover:scale-105 text-base sm:text-lg shadow-lg shadow-purple-500/30"
+        >
+          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+          Watch Animated Story
         </button>
       </div>
 
@@ -159,6 +170,51 @@ export function WrappedView({ stats }: WrappedViewProps) {
           </p>
         </div>
       </div>
+
+      {/* Story Mode Overlay */}
+      {showStoryMode && (
+        <StoryMode
+          stats={{
+            username: stats.username,
+            avatarUrl: stats.avatarUrl,
+            totalContributions: stats.totalContributions,
+            commits: stats.totalCommits,
+            pullRequests: stats.totalPRs,
+            issues: stats.totalIssues,
+            reviews: stats.totalReviews,
+            languages: stats.topLanguages.map(lang => ({
+              name: lang.name,
+              percentage: lang.percentage,
+              color: lang.color,
+            })),
+            topRepos: stats.topRepositories.map(repo => ({
+              name: repo.name,
+              commits: repo.commits,
+              additions: repo.additions,
+              deletions: repo.deletions,
+            })),
+            longestStreak: stats.streakStats.longestStreak,
+            currentStreak: stats.streakStats.currentStreak,
+            contributionCalendar: {
+              // Convert flat array back to weeks format for StoryMode
+              weeks: stats.contributionCalendar.reduce((weeks, day, index) => {
+                const weekIndex = Math.floor(index / 7);
+                if (!weeks[weekIndex]) {
+                  weeks[weekIndex] = { contributionDays: [] };
+                }
+                weeks[weekIndex].contributionDays.push({
+                  contributionCount: day.count,
+                  date: day.date,
+                });
+                return weeks;
+              }, [] as Array<{ contributionDays: Array<{ contributionCount: number; date: string }> }>),
+            },
+            followers: stats.followers || 0,
+            publicRepos: stats.publicRepos || 0,
+          }}
+          onClose={() => setShowStoryMode(false)}
+        />
+      )}
     </div>
   );
 }
