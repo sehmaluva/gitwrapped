@@ -166,7 +166,7 @@ export function WrappedView({ stats }: WrappedViewProps) {
         {/* Footer */}
         <div className="text-center pt-8">
           <p className="text-gray-500 text-sm">
-            Generated with ❤️ by GitHub Wrapped • {new Date().getFullYear()}
+            @sehmaluva• {new Date().getFullYear()}
           </p>
         </div>
       </div>
