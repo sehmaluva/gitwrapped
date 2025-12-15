@@ -34,18 +34,26 @@ export const authOptions: NextAuthOptions = {
       session.username = token.username as string;
       return session;
     },
-    // Ensure redirects always land on our own domain
+    // Harden redirects to avoid nested callbackUrl loops and cross-origin redirects
     async redirect({ url, baseUrl }) {
       try {
-        const parsed = new URL(url, baseUrl);
-        // Same origin or relative URL -> allow
-        if (parsed.origin === baseUrl || url.startsWith("/")) {
-          return parsed.toString();
-        }
+        const base = new URL(baseUrl);
+        const target = new URL(url, baseUrl);
+
+        // Enforce same-origin
+        if (target.origin !== base.origin) return base.toString();
+
+        // Drop redirects that contain nested callbackUrl params or OAuth errors
+        const cb = target.searchParams.get("callbackUrl");
+        const hasNestedCallback = cb ? /callbackUrl=/.test(cb) : false;
+        const hasError = target.searchParams.has("error");
+        if (hasNestedCallback || hasError) return base.toString();
+
+        // Allow safe same-origin url (including relative)
+        return target.toString();
       } catch {
-        // Fall through to baseUrl
+        return baseUrl;
       }
-      return baseUrl;
     },
   },
   pages: {
