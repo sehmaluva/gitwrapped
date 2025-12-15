@@ -1,68 +1,5 @@
 import { graphql } from "@octokit/graphql";
 
-export interface GitHubStats {
-  user: {
-    login: string;
-    name: string;
-    avatarUrl: string;
-    contributionsCollection: {
-      totalCommitContributions: number;
-      totalPullRequestContributions: number;
-      totalPullRequestReviewContributions: number;
-      totalIssueContributions: number;
-      totalRepositoryContributions: number;
-      contributionCalendar: {
-        totalContributions: number;
-        weeks: Array<{
-          contributionDays: Array<{
-            contributionCount: number;
-            date: string;
-            weekday: number;
-          }>;
-        }>;
-      };
-      commitContributionsByRepository: Array<{
-        repository: {
-          name: string;
-          owner: {
-            login: string;
-          };
-          primaryLanguage: {
-            name: string;
-            color: string;
-          } | null;
-          stargazerCount: number;
-          url: string;
-        };
-        contributions: {
-          totalCount: number;
-        };
-      }>;
-    };
-    repositories: {
-      nodes: Array<{
-        name: string;
-        primaryLanguage: {
-          name: string;
-          color: string;
-        } | null;
-        stargazerCount: number;
-        forkCount: number;
-        url: string;
-        languages: {
-          edges: Array<{
-            size: number;
-            node: {
-              name: string;
-              color: string;
-            };
-          }>;
-        };
-      }>;
-    };
-  };
-}
-
 export const GITHUB_STATS_QUERY = `
   query GetUserStats($username: String!, $from: DateTime!, $to: DateTime!) {
     user(login: $username) {
@@ -97,36 +34,75 @@ export const GITHUB_STATS_QUERY = `
             }
             stargazerCount
             url
+            languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
+              edges {
+                size
+                node {
+                  name
+                  color
+                }
+              }
+            }
           }
           contributions {
             totalCount
           }
         }
       }
-      repositories(first: 100, ownerAffiliations: OWNER, orderBy: {field: UPDATED_AT, direction: DESC}) {
-        nodes {
-          name
-          primaryLanguage {
-            name
-            color
-          }
-          stargazerCount
-          forkCount
-          url
-          languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
-            edges {
-              size
-              node {
-                name
-                color
-              }
-            }
-          }
-        }
-      }
     }
   }
 `;
+
+export interface GitHubStats {
+  user: {
+    login: string;
+    name: string;
+    avatarUrl: string;
+    contributionsCollection: {
+      totalCommitContributions: number;
+      totalPullRequestContributions: number;
+      totalPullRequestReviewContributions: number;
+      totalIssueContributions: number;
+      totalRepositoryContributions: number;
+      contributionCalendar: {
+        totalContributions: number;
+        weeks: Array<{
+          contributionDays: Array<{
+            contributionCount: number;
+            date: string;
+            weekday: number;
+          }>;
+        }>;
+      };
+      commitContributionsByRepository: Array<{
+        repository: {
+          name: string;
+          owner: {
+            login: string;
+          };
+          primaryLanguage: {
+            name: string;
+            color: string;
+          } | null;
+          stargazerCount: number;
+          url: string;
+          languages: {
+            edges: Array<{
+              size: number;
+              node: {
+                name: string;
+                color: string;
+              };
+            }>;
+          };
+        };
+        contributions: {
+          totalCount: number;
+        };
+      }>;
+    };
+  };
+}
 
 export async function fetchGitHubStats(
   accessToken: string,
@@ -209,16 +185,20 @@ export function processGitHubStats(data: GitHubStats): ProcessedStats {
       url: repo.repository.url,
     }));
 
-  // Calculate language usage across all repositories
+  // Calculate language usage from repositories you contributed to (weighted by commits)
   const languageMap = new Map<string, { size: number; color: string }>();
-  user.repositories.nodes.forEach((repo) => {
-    repo.languages.edges.forEach((edge) => {
+  
+  contributions.commitContributionsByRepository.forEach((repoContrib) => {
+    const commitWeight = repoContrib.contributions.totalCount;
+    repoContrib.repository.languages.edges.forEach((edge) => {
+      // Weight language size by number of commits to that repo
+      const weightedSize = edge.size * commitWeight;
       const existing = languageMap.get(edge.node.name);
       if (existing) {
-        existing.size += edge.size;
+        existing.size += weightedSize;
       } else {
         languageMap.set(edge.node.name, {
-          size: edge.size,
+          size: weightedSize,
           color: edge.node.color,
         });
       }
@@ -235,7 +215,7 @@ export function processGitHubStats(data: GitHubStats): ProcessedStats {
       name,
       color,
       size,
-      percentage: Math.round((size / totalLanguageSize) * 100),
+      percentage: totalLanguageSize > 0 ? Math.round((size / totalLanguageSize) * 100) : 0,
     }))
     .sort((a, b) => b.size - a.size)
     .slice(0, 6);

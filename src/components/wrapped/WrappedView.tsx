@@ -17,15 +17,19 @@ export function WrappedView({ stats }: WrappedViewProps) {
 
   const handleShare = async () => {
     try {
-      const html2canvas = (await import("html2canvas")).default;
+      const { domToPng } = await import("modern-screenshot");
       if (containerRef.current) {
-        const canvas = await html2canvas(containerRef.current, {
-          backgroundColor: "#0f0f0f",
+        const dataUrl = await domToPng(containerRef.current, {
           scale: 2,
+          backgroundColor: "#030712",
+          style: {
+            // Ensure consistent rendering
+            transform: "scale(1)",
+          },
         });
         const link = document.createElement("a");
         link.download = `github-wrapped-${stats.username}-2025.png`;
-        link.href = canvas.toDataURL();
+        link.href = dataUrl;
         link.click();
       }
     } catch (error) {
@@ -36,28 +40,28 @@ export function WrappedView({ stats }: WrappedViewProps) {
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-950 via-gray-900 to-gray-950">
       {/* Header */}
-      <div className="text-center pt-12 pb-8 px-4">
-        <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent mb-4">
+      <div className="text-center pt-6 sm:pt-8 md:pt-12 pb-4 sm:pb-6 md:pb-8 px-4">
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-bold bg-gradient-to-r from-sky-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent mb-3 sm:mb-4">
           GitHub Wrapped 2025
         </h1>
-        <div className="flex items-center justify-center gap-4 mb-6">
+        <div className="flex items-center justify-center gap-3 sm:gap-4 mb-4 sm:mb-6">
           <Image
             src={stats.avatarUrl}
             alt={stats.name}
             width={64}
             height={64}
-            className="rounded-full ring-4 ring-sky-500/30"
+            className="rounded-full ring-4 ring-sky-500/30 w-12 h-12 sm:w-16 sm:h-16"
           />
           <div className="text-left">
-            <h2 className="text-2xl font-bold text-white">{stats.name}</h2>
-            <p className="text-gray-400">@{stats.username}</p>
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">{stats.name}</h2>
+            <p className="text-gray-400 text-sm sm:text-base">@{stats.username}</p>
           </div>
         </div>
         <button
           onClick={handleShare}
-          className="px-6 py-3 bg-gradient-to-r from-sky-500 to-emerald-600 hover:from-sky-600 hover:to-emerald-700 text-white rounded-full font-semibold flex items-center gap-2 mx-auto transition-all hover:scale-105"
+          className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-sky-500 to-emerald-600 hover:from-sky-600 hover:to-emerald-700 text-white rounded-full font-semibold flex items-center gap-2 mx-auto transition-all hover:scale-105 text-sm sm:text-base"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
           </svg>
           Download as Image
@@ -65,9 +69,9 @@ export function WrappedView({ stats }: WrappedViewProps) {
       </div>
 
       {/* Stats Content */}
-      <div ref={containerRef} className="max-w-6xl mx-auto px-4 pb-12 space-y-8">
+      <div ref={containerRef} className="max-w-6xl mx-auto px-3 sm:px-4 pb-8 sm:pb-12 space-y-4 sm:space-y-6 md:space-y-8" style={{ backgroundColor: "#030712" }}>
         {/* Hero Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           <StatsCard
             title="Total Contributions"
             value={stats.totalContributions}
@@ -112,35 +116,35 @@ export function WrappedView({ stats }: WrappedViewProps) {
         </div>
 
         {/* Streak & Activity Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4">
           <StatsCard
             title="Current Streak"
             value={`${stats.streakStats.currentStreak} days`}
-            icon={<span className="text-2xl">🔥</span>}
+            icon={<span className="text-lg sm:text-2xl">🔥</span>}
             gradient="from-orange-500 to-yellow-500"
           />
           <StatsCard
             title="Longest Streak"
             value={`${stats.streakStats.longestStreak} days`}
-            icon={<span className="text-2xl">🏆</span>}
+            icon={<span className="text-lg sm:text-2xl">🏆</span>}
             gradient="from-yellow-500 to-amber-600"
           />
           <StatsCard
             title="Most Productive Day"
             value={stats.mostProductiveDay}
-            icon={<span className="text-2xl">📅</span>}
+            icon={<span className="text-lg sm:text-2xl">📅</span>}
             gradient="from-sky-500 to-cyan-600"
           />
           <StatsCard
             title="Most Productive Month"
             value={stats.mostProductiveMonth}
-            icon={<span className="text-2xl">📊</span>}
+            icon={<span className="text-lg sm:text-2xl">📊</span>}
             gradient="from-emerald-500 to-teal-600"
           />
         </div>
 
         {/* Charts Row */}
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
           <LanguageChart languages={stats.topLanguages} />
           <TopRepos repositories={stats.topRepositories} />
         </div>
