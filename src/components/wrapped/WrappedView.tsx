@@ -9,6 +9,7 @@ import { LanguageChart } from "./LanguageChart";
 import { ContributionCalendar } from "./ContributionCalendar";
 import { TopRepos } from "./TopRepos";
 import { GitistaRanking } from "./GitistaRanking";
+import { CommitsTopRanking } from "./CommitsTopRanking";
 import StoryMode from "./story/StoryMode";
 
 interface WrappedViewProps {
@@ -250,7 +251,10 @@ export function WrappedView({ stats }: WrappedViewProps) {
         <ContributionCalendar data={stats.contributionCalendar} />
 
         {/* Gitista Ranking Card */}
-        <GitistaRanking username={stats.username} location={stats.location} />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <GitistaRanking username={stats.username} location={stats.location} />
+          <CommitsTopRanking username={stats.username} location={stats.location} />
+        </div>
 
         {/* Footer */}
         <div className="text-center pt-8 space-y-4">
