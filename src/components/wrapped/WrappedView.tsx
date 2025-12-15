@@ -16,26 +16,73 @@ interface WrappedViewProps {
 export function WrappedView({ stats }: WrappedViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showStoryMode, setShowStoryMode] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
 
-  const handleShare = async () => {
+  // Check if native sharing is supported
+  const canShare = typeof navigator !== 'undefined' && !!navigator.share;
+
+  const generateImage = async () => {
+    const { domToPng } = await import("modern-screenshot");
+    if (containerRef.current) {
+      return await domToPng(containerRef.current, {
+        scale: 2,
+        backgroundColor: "#030712",
+        style: {
+          transform: "scale(1)",
+        },
+      });
+    }
+    return null;
+  };
+
+  const handleDownload = async () => {
+    setIsDownloading(true);
     try {
-      const { domToPng } = await import("modern-screenshot");
-      if (containerRef.current) {
-        const dataUrl = await domToPng(containerRef.current, {
-          scale: 2,
-          backgroundColor: "#030712",
-          style: {
-            // Ensure consistent rendering
-            transform: "scale(1)",
-          },
-        });
+      const dataUrl = await generateImage();
+      if (dataUrl) {
         const link = document.createElement("a");
         link.download = `github-wrapped-${stats.username}-2025.png`;
         link.href = dataUrl;
         link.click();
       }
     } catch (error) {
-      console.error("Error generating image:", error);
+      console.error("Error downloading:", error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleShare = async () => {
+    setIsSharing(true);
+    try {
+      const dataUrl = await generateImage();
+      if (dataUrl) {
+        // Convert data URL to blob for sharing
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
+        const file = new File([blob], `github-wrapped-${stats.username}-2025.png`, { type: 'image/png' });
+
+        // Check if Web Share API supports files
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+          });
+        } else {
+          // Fallback: download the image if file sharing not supported
+          const link = document.createElement("a");
+          link.download = `github-wrapped-${stats.username}-2025.png`;
+          link.href = dataUrl;
+          link.click();
+        }
+      }
+    } catch (error) {
+      // User cancelled or error occurred
+      if ((error as Error).name !== 'AbortError') {
+        console.error("Error sharing:", error);
+      }
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -59,18 +106,34 @@ export function WrappedView({ stats }: WrappedViewProps) {
             <p className="text-gray-400 text-sm sm:text-base">@{stats.username}</p>
           </div>
         </div>
-        <button
-          onClick={handleShare}
-          className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-sky-500 to-emerald-600 hover:from-sky-600 hover:to-emerald-700 text-white rounded-full font-semibold flex items-center gap-2 mx-auto transition-all hover:scale-105 text-sm sm:text-base"
-        >
-          <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-          </svg>
-          Download as Image
-        </button>
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+          {/* Share Button */}
+          <button
+            onClick={canShare ? handleShare : handleDownload}
+            disabled={isSharing || isDownloading}
+            className="px-4 sm:px-6 py-2 sm:py-3 bg-gradient-to-r from-sky-500 to-emerald-600 hover:from-sky-600 hover:to-emerald-700 text-white rounded-full font-semibold flex items-center gap-2 transition-all hover:scale-105 text-sm sm:text-base disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {(isSharing || isDownloading) ? (
+              <>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Preparing...
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+                Share
+              </>
+            )}
+          </button>
+        </div>
         <button
           onClick={() => setShowStoryMode(true)}
-          className="mt-3 px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-full font-bold flex items-center gap-3 mx-auto transition-all hover:scale-105 text-base sm:text-lg shadow-lg shadow-purple-500/30"
+          className="px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-violet-500 via-purple-500 to-pink-500 hover:from-violet-600 hover:via-purple-600 hover:to-pink-600 text-white rounded-full font-bold flex items-center gap-3 mx-auto transition-all hover:scale-105 text-base sm:text-lg shadow-lg shadow-purple-500/30"
         >
           <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7z" />

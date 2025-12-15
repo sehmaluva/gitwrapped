@@ -71,7 +71,7 @@ export default function RankingsSlide({
   ];
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 overflow-hidden">
+    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-sky-900 to-green-900 overflow-hidden">
       {/* Animated stars background */}
       <div className="absolute inset-0">
         {stars.map((star) => (

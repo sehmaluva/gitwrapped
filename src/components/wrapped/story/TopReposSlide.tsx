@@ -15,7 +15,7 @@ export default function TopReposSlide({ repos }: TopReposSlideProps) {
   const topRepos = repos.slice(0, 5);
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-sky-900 to-cyan-900 overflow-hidden">
+    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-green-900 to-sky-900 overflow-hidden">
       {/* Animated lines background */}
       <div className="absolute inset-0 overflow-hidden opacity-20">
         {[...Array(10)].map((_, i) => (

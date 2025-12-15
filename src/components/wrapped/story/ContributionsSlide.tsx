@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { getMotivationalQuote } from './QuotesAndSuggestions';
 
 interface ContributionsSlideProps {
   totalContributions: number;
@@ -9,6 +10,7 @@ interface ContributionsSlideProps {
   pullRequests: number;
   issues: number;
   reviews: number;
+  longestStreak?: number;
 }
 
 const CODE_SYMBOLS = ['{ }', '< />', '( )', '[ ]', '=> ', '++', '==', '&&'];
@@ -30,7 +32,9 @@ export default function ContributionsSlide({
   pullRequests,
   issues,
   reviews,
+  longestStreak = 0,
 }: ContributionsSlideProps) {
+  const quote = getMotivationalQuote(totalContributions, longestStreak);
   const stats = [
     { label: 'Commits', value: commits, color: 'from-emerald-400 to-green-500' },
     { label: 'Pull Requests', value: pullRequests, color: 'from-sky-400 to-blue-500' },
@@ -42,7 +46,7 @@ export default function ContributionsSlide({
   const [codeParticles] = useState(generateCodeParticles);
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-emerald-900 to-teal-900 overflow-hidden">
+    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-green-900 to-sky-900 overflow-hidden">
       {/* Animated code particles */}
       <div className="absolute inset-0 overflow-hidden">
         {codeParticles.map((particle) => (
@@ -144,6 +148,16 @@ export default function ContributionsSlide({
               <p className="text-sm md:text-base text-white/70 mt-1">{stat.label}</p>
             </motion.div>
           ))}
+        </motion.div>
+
+        {/* Motivational Quote */}
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 2 }}
+          className="mt-8 text-center"
+        >
+          <p className="text-white/80 text-sm md:text-base italic">{quote}</p>
         </motion.div>
       </motion.div>
 

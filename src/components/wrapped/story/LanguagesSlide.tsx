@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { getLanguageQuote } from './QuotesAndSuggestions';
 
 interface LanguagesSlideProps {
   languages: Array<{ name: string; percentage: number; color: string }>;
@@ -8,12 +9,13 @@ interface LanguagesSlideProps {
 
 export default function LanguagesSlide({ languages }: LanguagesSlideProps) {
   const topLanguages = languages.slice(0, 5);
+  const languageQuote = topLanguages[0] ? getLanguageQuote(topLanguages[0].name) : '';
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-violet-900 to-purple-900 overflow-hidden">
+    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-sky-900 to-green-900 overflow-hidden">
       {/* Animated gradient orbs */}
       <motion.div
-        className="absolute top-1/4 -left-20 w-64 h-64 bg-purple-500/30 rounded-full blur-3xl"
+        className="absolute top-1/4 -left-20 w-64 h-64 bg-sky-500/30 rounded-full blur-3xl"
         animate={{
           x: [0, 50, 0],
           y: [0, -30, 0],
@@ -21,7 +23,7 @@ export default function LanguagesSlide({ languages }: LanguagesSlideProps) {
         transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
       />
       <motion.div
-        className="absolute bottom-1/4 -right-20 w-64 h-64 bg-pink-500/30 rounded-full blur-3xl"
+        className="absolute bottom-1/4 -right-20 w-64 h-64 bg-green-500/30 rounded-full blur-3xl"
         animate={{
           x: [0, -50, 0],
           y: [0, 30, 0],
@@ -109,6 +111,18 @@ export default function LanguagesSlide({ languages }: LanguagesSlideProps) {
             </motion.div>
           ))}
         </div>
+
+        {/* Language Quote */}
+        {languageQuote && (
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.2 }}
+            className="mt-6 text-white/60 text-sm italic text-center max-w-sm"
+          >
+            {languageQuote}
+          </motion.p>
+        )}
       </motion.div>
 
       {/* Floating language icons */}

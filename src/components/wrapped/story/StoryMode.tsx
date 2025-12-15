@@ -8,6 +8,8 @@ import LanguagesSlide from './LanguagesSlide';
 import TopReposSlide from './TopReposSlide';
 import StreakSlide from './StreakSlide';
 import RankingsSlide from './RankingsSlide';
+import ProgressionSlide from './ProgressionSlide';
+import SuggestionsSlide from './SuggestionsSlide';
 import OutroSlide from './OutroSlide';
 
 interface StoryModeProps {
@@ -105,6 +107,7 @@ export default function StoryMode({ stats, onClose }: StoryModeProps) {
           pullRequests={stats.pullRequests}
           issues={stats.issues}
           reviews={stats.reviews}
+          longestStreak={stats.longestStreak}
         />
       ),
     },
@@ -136,6 +139,29 @@ export default function StoryMode({ stats, onClose }: StoryModeProps) {
           totalContributions={stats.totalContributions}
           followers={stats.followers}
           publicRepos={stats.publicRepos}
+        />
+      ),
+    },
+    {
+      id: 'progression',
+      component: (
+        <ProgressionSlide
+          contributionCalendar={stats.contributionCalendar}
+        />
+      ),
+    },
+    {
+      id: 'suggestions',
+      component: (
+        <SuggestionsSlide
+          stats={{
+            totalContributions: stats.totalContributions,
+            longestStreak: stats.longestStreak,
+            currentStreak: stats.currentStreak,
+            topLanguages: stats.languages,
+            totalPRs: stats.pullRequests,
+            totalReviews: stats.reviews,
+          }}
         />
       ),
     },

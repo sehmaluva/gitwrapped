@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { getStreakQuote } from './QuotesAndSuggestions';
 
 interface StreakSlideProps {
   longestStreak: number;
@@ -28,9 +29,10 @@ export default function StreakSlide({
 }: StreakSlideProps) {
   // Use useState with initializer to generate values only once
   const [fireParticles] = useState(generateFireParticles);
+  const streakQuote = getStreakQuote(longestStreak);
 
   return (
-    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-orange-900 to-red-900 overflow-hidden">
+    <div className="relative w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-green-800 to-sky-900 overflow-hidden">
       {/* Animated fire particles */}
       <div className="absolute inset-0 overflow-hidden">
         {fireParticles.map((particle) => (
@@ -154,6 +156,16 @@ export default function StreakSlide({
             <span className="text-orange-400 font-semibold">{mostActiveMonth}</span> was your most productive month
           </p>
         </motion.div>
+
+        {/* Streak Quote */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.8 }}
+          className="mt-4 text-white/60 text-sm italic text-center max-w-xs"
+        >
+          {streakQuote}
+        </motion.p>
       </motion.div>
 
       {/* Animated streak flames on sides */}
