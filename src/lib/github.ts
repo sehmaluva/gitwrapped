@@ -118,6 +118,11 @@ export interface GitHubStats {
   };
 }
 
+export async function getGitHubStats(accessToken: string, username: string) {
+  const rawStats = await fetchGitHubStats(accessToken, username);
+  return processGitHubStats(rawStats);
+}
+
 export async function fetchGitHubStats(
   accessToken: string,
   username: string

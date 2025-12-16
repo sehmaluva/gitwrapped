@@ -5,7 +5,11 @@ import { SessionProvider } from "@/components/providers/SessionProvider";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next"
 
-const inter = Inter({ subsets: ["latin"], preload: false });
+const inter = Inter({ 
+  subsets: ["latin"], 
+  display: 'swap',
+  variable: '--font-inter',
+});
 
 export const metadata: Metadata = {
   title: "GitHub Wrapped 2025 - Your Year in Code",
