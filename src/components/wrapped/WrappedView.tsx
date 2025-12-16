@@ -11,6 +11,7 @@ import { TopRepos } from "./TopRepos";
 import { GitistaRanking } from "./GitistaRanking";
 import { CommitsTopRanking } from "./CommitsTopRanking";
 import StoryMode from "./story/StoryMode";
+import { useDeferredRender } from "@/lib/useDeferredRender";
 
 interface WrappedViewProps {
   stats: ProcessedStats;
@@ -20,6 +21,7 @@ export function WrappedView({ stats }: WrappedViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [showStoryMode, setShowStoryMode] = useState(false);
   const [isSharing, setIsSharing] = useState(false);
+  const heavyReady = useDeferredRender(1200);
 
   const generateImage = async () => {
     const { domToPng } = await import("modern-screenshot");
@@ -114,6 +116,7 @@ export function WrappedView({ stats }: WrappedViewProps) {
             width={64}
             height={64}
             className="rounded-full ring-4 ring-sky-500/30 w-12 h-12 sm:w-16 sm:h-16"
+            priority
           />
           <div className="text-left">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white">{stats.name}</h2>
@@ -243,12 +246,24 @@ export function WrappedView({ stats }: WrappedViewProps) {
 
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
-          <LanguageChart languages={stats.topLanguages} />
-          <TopRepos repositories={stats.topRepositories} />
+          {heavyReady ? (
+            <LanguageChart languages={stats.topLanguages} />
+          ) : (
+            <div className="h-64 w-full rounded-xl border border-gray-800 bg-gray-900/40 animate-pulse" />
+          )}
+          {heavyReady ? (
+            <TopRepos repositories={stats.topRepositories} />
+          ) : (
+            <div className="h-40 w-full rounded-xl border border-gray-800 bg-gray-900/40 animate-pulse" />
+          )}
         </div>
 
         {/* Contribution Calendar */}
-        <ContributionCalendar data={stats.contributionCalendar} />
+        {heavyReady ? (
+          <ContributionCalendar data={stats.contributionCalendar} />
+        ) : (
+          <div className="h-56 w-full rounded-xl border border-gray-800 bg-gray-900/40 animate-pulse" />
+        )}
 
         {/* Gitista Ranking Card */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
