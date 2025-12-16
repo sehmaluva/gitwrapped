@@ -7,7 +7,7 @@ interface CommitsTopRankingProps {
   location: string | null;
 }
 
-// Helper to format location for Commits.top URL
+// Helper to format location for committers.top URL
 function getCountrySlug(location: string | null): { slug: string; name: string } | null {
   if (!location) return null;
   
@@ -26,13 +26,13 @@ export function CommitsTopRanking({ username, location }: CommitsTopRankingProps
   
   const countryInfo = getCountrySlug(location);
   
-  // Commits.top uses country names in lowercase with hyphens for URLs
-  // e.g. https://commits.top/united-states.html
+  // committers.top uses country names in lowercase with hyphens for URLs
+  // e.g. https://committers.top/united-states.html
   const commitsTopUrl = countryInfo 
-    ? `https://commits.top/${countryInfo.slug}.html`
+    ? `https://committers.top/${countryInfo.slug}.html`
     : null;
   
-  // If no country is detected, we don't show this card as Commits.top is country-based
+  // If no country is detected, we don't show this card as committers.top is country-based
   if (!countryInfo || !commitsTopUrl) return null;
 
   return (
@@ -54,7 +54,7 @@ export function CommitsTopRanking({ username, location }: CommitsTopRankingProps
             </svg>
           </div>
           <div>
-            <h3 className="text-lg font-bold text-white">Commits.top Ranking</h3>
+            <h3 className="text-lg font-bold text-white">committers.top Ranking</h3>
             <p className="text-sm text-gray-400">{countryInfo.name} Ranking</p>
           </div>
         </div>
@@ -66,7 +66,7 @@ export function CommitsTopRanking({ username, location }: CommitsTopRankingProps
       </div>
       
       <p className="text-gray-300 text-sm mb-4">
-        Check the most active GitHub users in {countryInfo.name} on Commits.top
+        Check the most active GitHub users in {countryInfo.name} on committers.top
       </p>
       
       <div className="flex items-center gap-2 text-emerald-400 font-medium text-sm">
